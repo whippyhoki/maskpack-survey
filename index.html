@@ -167,6 +167,14 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
 .row:not(.pick) .fill{background:#b9d7fb}
 .back{margin-top:16px;color:var(--muted)}
 </style>
+<style>
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.live em{font-style:normal}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(18,184,134,.5);animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(18,184,134,.45)}100%{box-shadow:0 0 0 8px rgba(18,184,134,0)}}
+.row b{transition:color .3s}.row b.bump{color:var(--accent)}
+.fill{transition:width .9s cubic-bezier(.2,.8,.2,1)}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -212,7 +220,7 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
       <p>소중한 의견 잘 받았어요.</p>
       <div class="mine" id="mine"></div>
       <div class="res" id="res" hidden>
-        <div class="res-h"><b>지금까지 응답 결과</b><span id="res-total"></span></div>
+        <div class="res-h"><b>지금까지 응답 결과</b><span class="live"><i></i>실시간 · <em id="res-total"></em></span></div>
         <div class="rows" id="r-rows"></div>
       </div>
       <div class="share">
@@ -287,22 +295,45 @@ function showDone(c){
   $("mine").textContent="내 응답: "+LABEL[choice]+(choice==="etc"&&memo()?" — "+memo():"");
   $("v-survey").hidden=true;$("bar").hidden=true;$("v-done").hidden=false;burst();
   window.scrollTo(0,0);
-  const box=$("res"),rows=$("r-rows");rows.innerHTML="";
-  if(!c||!c.total){box.hidden=true;return}
-  box.hidden=false;$("res-total").textContent="총 "+c.total+"명";
-  ["gel","sheet","daily","etc"].forEach((k,i)=>{
+  $("r-rows").innerHTML="";
+  if(!c||!c.total){$("res").hidden=true}else{renderRes(c,true)}
+  startLive();
+}
+const KEYS=["gel","sheet","daily","etc"];
+function renderRes(c,first){
+  if(!c||!c.total)return;
+  const box=$("res"),rows=$("r-rows");box.hidden=false;
+  $("res-total").textContent="총 "+c.total+"명";
+  KEYS.forEach((k,i)=>{
     const pct=Math.round(c[k]/c.total*100);
-    const row=document.createElement("div");row.className="row"+(k===choice?" pick":"");
-    row.innerHTML='<div class="top"><span></span><b></b></div><div class="track"><div class="fill"></div></div>';
-    const lab=row.querySelector("span");lab.textContent=SHORT[k];
-    if(k===choice){const t=document.createElement("em");t.className="me";t.textContent="내 선택";lab.appendChild(t)}
-    row.querySelector("b").textContent=pct+"%";
-    rows.appendChild(row);
-    setTimeout(()=>row.querySelector(".fill").style.width=pct+"%",250+i*120);
+    let row=rows.querySelector('[data-k="'+k+'"]');
+    if(!row){
+      row=document.createElement("div");row.className="row"+(k===choice?" pick":"");row.dataset.k=k;
+      row.innerHTML='<div class="top"><span></span><b></b></div><div class="track"><div class="fill"></div></div>';
+      const lab=row.querySelector("span");lab.textContent=SHORT[k];
+      if(k===choice){const t=document.createElement("em");t.className="me";t.textContent="내 선택";lab.appendChild(t)}
+      rows.appendChild(row);
+    }
+    const bEl=row.querySelector("b"),txt=pct+"%";
+    if(!first&&bEl.textContent!==txt){bEl.classList.add("bump");setTimeout(()=>bEl.classList.remove("bump"),900)}
+    bEl.textContent=txt;
+    const f=row.querySelector(".fill");
+    if(first)setTimeout(()=>f.style.width=pct+"%",250+i*120);else f.style.width=pct+"%";
   });
 }
+// 실시간 반영: 완료 화면이 보이는 동안 10초마다 집계 갱신 (최대 10분)
+let liveTimer=null,liveStart=0;
+function startLive(){
+  stopLive();liveStart=Date.now();
+  liveTimer=setInterval(async()=>{
+    if($("v-done").hidden||Date.now()-liveStart>600000){stopLive();return}
+    if(document.visibilityState!=="visible")return;
+    try{const r=await fetch(ENDPOINT+"?f=json",{credentials:"omit",cache:"no-store"});const d=await r.json();renderRes(d.counts,$("r-rows").children.length===0)}catch(e){}
+  },10000);
+}
+function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 $("back").addEventListener("click",()=>{
-  choice=null;$("other-text").value="";$("other").classList.remove("open");
+  stopLive();choice=null;$("other-text").value="";$("other").classList.remove("open");
   document.querySelectorAll(".opt").forEach(o=>{o.classList.remove("on");o.querySelector("input").checked=false});
   $("v-done").hidden=true;$("v-survey").hidden=false;$("bar").hidden=false;refresh();window.scrollTo(0,0);
 });
