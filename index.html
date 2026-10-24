@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>마스크팩 설문조사</title>
+<meta name="description" content="가장 효과 좋았던 마스크팩 하나만 골라주세요. 10초면 끝나요.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://whippyhoki.github.io/maskpack-survey/">
+<meta property="og:title" content="마스크팩 설문조사 · 10초면 끝나요">
+<meta property="og:description" content="가장 사용하기 편하고, 효과 좋았던 마스크팩 하나만 골라주세요 🙏">
+<meta property="og:image" content="https://whippyhoki.github.io/maskpack-survey/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f6f8fb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* 레이아웃: 모바일 한 장짜리 설문. 상단 물방울 히어로 → 선택 카드 4개 → 하단 고정 제출 버튼. 관리자는 '결과' 탭 추가 */
+:root{
+  --bg:#f6f8fb;
+  --surface:#ffffff;
+  --fg:#191f28;
+  --muted:#6b7684;
+  --line:#e5e8eb;
+  --accent:#3182f6;
+  --accent-soft:#e8f3ff;
+  --essence:#7cc4ff;
+  --ok:#12b886;
+  --warn:#f04452;
+  --shadow:0 1px 2px rgba(25,31,40,.04),0 6px 20px rgba(49,130,246,.06);
+  --font:"Pretendard","Pretendard Variable","Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101318;--surface:#1b1f26;--fg:#eef1f5;--muted:#9aa3ae;--line:#2a3039;
+  --accent:#4c93ff;--accent-soft:#16263d;--essence:#5aa9e6;--ok:#38d39f;--warn:#ff6b75;
+  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318;--surface:#1b1f26;--fg:#eef1f5;--muted:#9aa3ae;--line:#2a3039;
+  --accent:#4c93ff;--accent-soft:#16263d;--essence:#5aa9e6;--ok:#38d39f;--warn:#ff6b75;
+  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px;display:flex;flex-direction:column;gap:20px}
+
+/* 탭 (관리자만) */
+.tabs{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:12px;align-self:flex-start}
+.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:8px 16px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+
+/* 히어로 */
+.hero{position:relative;padding-top:8px}
+.drops{position:relative;height:96px;margin-bottom:8px}
+.drop{position:absolute;bottom:0;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:linear-gradient(160deg,var(--essence),var(--accent));opacity:.9;animation:bob 3.6s ease-in-out infinite}
+.drop::after{content:"";position:absolute;left:24%;top:22%;width:22%;height:18%;border-radius:50%;background:rgba(255,255,255,.55)}
+.d1{left:0;width:58px;height:70px;animation-delay:0s}
+.d2{left:66px;width:36px;height:44px;opacity:.6;animation-delay:.5s}
+.d3{left:110px;width:22px;height:27px;opacity:.4;animation-delay:1s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.eyebrow{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+h1{font-size:24px;line-height:1.38;font-weight:800;margin:6px 0 8px;text-wrap:balance;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0}
+
+/* 선택지 */
+.opts{display:flex;flex-direction:column;gap:10px;border:0;padding:0;margin:0;min-width:0}
+.opt{position:relative;display:flex;align-items:center;gap:14px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;overflow:hidden;
+  transition:border-color .2s,transform .15s,background .2s;animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.opt:nth-child(1){animation-delay:.05s}.opt:nth-child(2){animation-delay:.12s}.opt:nth-child(3){animation-delay:.19s}.opt:nth-child(4){animation-delay:.26s}
+@keyframes rise{from{transform:translateY(14px)}to{transform:none}}
+.opt:active{transform:scale(.985)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.ico{flex:none;width:48px;height:48px;border-radius:14px;background:var(--bg);display:grid;place-items:center;transition:background .2s}
+.opt.on .ico{background:var(--surface)}
+.ico svg{width:30px;height:30px}
+.txt{flex:1;min-width:0}
+.t{font-weight:700;font-size:16px}
+.d{color:var(--muted);font-size:13.5px}
+.chk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:all .2s}
+.chk svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .05s}
+.opt.on .chk{background:var(--accent);border-color:var(--accent)}
+.opt.on .chk svg{stroke-dashoffset:0}
+.ripple{position:absolute;border-radius:50%;background:var(--accent);opacity:.18;transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.opt.on .ico svg{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+
+.other{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.other.open{grid-template-rows:1fr}
+.other>div{overflow:hidden}
+.other textarea{width:100%;margin-top:2px;min-height:84px;resize:vertical;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font:inherit;background:var(--surface);color:var(--fg)}
+.other textarea:focus{outline:none;border-color:var(--accent)}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 2px 0}
+
+/* 하단 버튼 */
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(to top,var(--bg) 70%,transparent)}
+.bar .in{max-width:520px;margin:0 auto}
+.btn{width:100%;border:0;border-radius:16px;padding:17px;font:inherit;font-weight:700;font-size:16px;background:var(--accent);color:#fff;cursor:pointer;transition:opacity .2s,transform .1s}
+.btn:active{transform:scale(.985)}
+a.btn{display:block;text-align:center;text-decoration:none}
+.btn:disabled{opacity:.35;cursor:default}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.notice{font-size:13px;color:var(--muted);text-align:center;margin:8px 0 0}
+.notice.err{color:var(--warn)}
+
+/* 완료 */
+.done{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:56px}
+.burst{position:relative;width:120px;height:120px;margin-bottom:12px}
+.burst .core{position:absolute;inset:22px;border-radius:50%;background:linear-gradient(160deg,var(--essence),var(--accent));display:grid;place-items:center;animation:grow .6s cubic-bezier(.3,1.5,.5,1) both}
+.burst .core svg{width:36px;height:36px;stroke:#fff;stroke-width:3.2;fill:none;stroke-dasharray:40;stroke-dashoffset:40;animation:draw .45s .35s ease-out forwards}
+.burst i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:var(--essence);opacity:0;animation:fly .9s .2s ease-out forwards}
+@keyframes grow{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
+.done h2{font-size:22px;margin:0;font-weight:800}
+.done p{margin:0;color:var(--muted)}
+.mine{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:14px}
+.share{width:100%;margin-top:28px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.share-t{margin:0;font-weight:700;color:var(--fg)!important}
+#share-text{width:100%;height:110px;border:1.5px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:13.5px;background:var(--surface);color:var(--fg)}
+.toast-in{animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+.link{background:none;border:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;margin-top:8px;padding:8px}
+
+/* 결과 */
+.card{background:var(--surface);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.total{display:flex;align-items:baseline;gap:6px}
+.total b{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.total span{color:var(--muted)}
+.rows{display:flex;flex-direction:column;gap:16px;margin-top:18px}
+.row .top{display:flex;justify-content:space-between;gap:12px;font-size:14.5px}
+.row .top b{font-variant-numeric:tabular-nums}
+.row .top em{font-style:normal;color:var(--muted);font-weight:500;margin-left:4px}
+.track{height:10px;background:var(--bg);border-radius:6px;margin-top:6px;overflow:hidden}
+.fill{height:100%;width:0;border-radius:6px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.row.lead .fill{background:linear-gradient(90deg,var(--essence),var(--accent))}
+h3{font-size:15px;margin:0 0 10px;font-weight:800}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.list li:first-child{border-top:0}
+.list .who{color:var(--muted);flex:none;font-size:13px}
+.list .what{min-width:0;overflow-wrap:anywhere}
+.empty{color:var(--muted);font-size:14px;margin:0}
+.copy{margin-top:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:13.5px;font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.chk svg,.burst .core svg{stroke-dashoffset:0}}
+</style>
+
+<style>.btn.loading{opacity:.6;pointer-events:none}</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="v-survey">
+    <div class="hero">
+      <div class="drops" aria-hidden="true"><span class="drop d1"></span><span class="drop d2"></span><span class="drop d3"></span></div>
+      <div class="eyebrow">마스크팩 설문조사 · 1문항</div>
+      <h1>가장 사용하기 편하고, 실제로 효과가 좋았던 마스크팩을 한 가지만 골라주세요</h1>
+      <p class="sub">10초면 끝나요.</p>
+    </div>
+
+    <form id="f" style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+      <fieldset class="opts" id="opts">
+        <legend class="sr" hidden>마스크팩 종류</legend>
+        <label class="opt" data-v="gel"><input type="radio" name="c" id="c-gel" value="gel">
+          <span class="ico"><svg viewBox="0 0 32 32"><path d="M16 4c5 6 9 10.5 9 15a9 9 0 0 1-18 0c0-4.5 4-9 9-15z" fill="var(--essence)"/><ellipse cx="12.5" cy="18" rx="2" ry="3" fill="#fff" opacity=".6"/></svg></span>
+          <span class="txt"><span class="t">젤 타입 팩</span><br><span class="d">콜라겐 · 진정 · 탄력</span></span>
+          <span class="chk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 5"/></svg></span></label>
+        <label class="opt" data-v="sheet"><input type="radio" name="c" id="c-sheet" value="sheet">
+          <span class="ico"><svg viewBox="0 0 32 32"><path d="M8 5h16a3 3 0 0 1 3 3v12c0 5-5 8-11 8S5 25 5 20V8a3 3 0 0 1 3-3z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/><circle cx="12" cy="13" r="1.8" fill="var(--accent)"/><circle cx="20" cy="13" r="1.8" fill="var(--accent)"/><path d="M13 20q3 2 6 0" stroke="var(--accent)" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M26 23c1.2 1.6 1.8 2.6 1.8 3.4a1.8 1.8 0 0 1-3.6 0c0-.8.6-1.8 1.8-3.4z" fill="var(--essence)"/></svg></span>
+          <span class="txt"><span class="t">에센스 듬뿍 기본 시트팩</span><br><span class="d">수분 공급 · 보습</span></span>
+          <span class="chk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 5"/></svg></span></label>
+        <label class="opt" data-v="daily"><input type="radio" name="c" id="c-daily" value="daily">
+          <span class="ico"><svg viewBox="0 0 32 32"><rect x="5" y="14" width="22" height="13" rx="3" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/><path d="M12 14c0-6 2-9 4-9s4 3 4 9" fill="#fff" stroke="var(--essence)" stroke-width="1.6"/><path d="M11 20h10" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          <span class="txt"><span class="t">뽑아 쓰는 데일리 팩</span><br><span class="d">간편하게 매일 사용하는 타입</span></span>
+          <span class="chk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 5"/></svg></span></label>
+        <label class="opt" data-v="etc"><input type="radio" name="c" id="c-etc" value="etc">
+          <span class="ico"><svg viewBox="0 0 32 32"><circle cx="9" cy="16" r="2.4" fill="var(--muted)"/><circle cx="16" cy="16" r="2.4" fill="var(--muted)"/><circle cx="23" cy="16" r="2.4" fill="var(--muted)"/></svg></span>
+          <span class="txt"><span class="t">기타</span><br><span class="d">어떤 팩인지 적어주세요</span></span>
+          <span class="chk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 5"/></svg></span></label>
+      </fieldset>
+      <div class="other" id="other"><div>
+        <textarea id="other-text" maxlength="300" placeholder="예) 워시오프 팩, 수면팩, 패드형 팩 등"></textarea>
+        <p class="hint">사용하신 팩 종류를 적어주세요 😊</p>
+      </div></div>
+    </form>
+  </section>
+
+  <section id="v-done" hidden>
+    <div class="done">
+      <div class="burst" id="burst"><div class="core"><svg viewBox="0 0 36 36"><path d="M9 18.5l6 6L27 12"/></svg></div></div>
+      <h2>응답 제출해주셔서 고맙습니다 🙏</h2>
+      <p>소중한 의견 잘 받았어요.</p>
+      <div class="mine" id="mine"></div>
+      <div class="share">
+        <p class="share-t">주변 친구들 의견도 궁금해요</p>
+        <button class="btn" id="share" type="button">친구에게 공유하기</button>
+        <p class="hint" id="share-msg" aria-live="polite"></p>
+        <textarea id="share-text" readonly hidden></textarea>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="bar" id="bar"><div class="in">
+  <button class="btn" id="submit" type="button" disabled>제출하기</button>
+  <p class="notice" id="notice">하나를 선택하면 제출할 수 있어요.</p>
+</div></div>
+
+<script>
+const ENDPOINT="https://script.google.com/macros/s/AKfycbzBOWFWYZ5dEfHCZZ7zS7R4AeqjxUmUhriLn6-Jka_udHXbj1-C5uX6aT_cWRJY_oai6g/exec";
+const SHARE_URL="https://whippyhoki.github.io/maskpack-survey/";
+const LABEL={gel:"젤 타입 팩",sheet:"에센스 듬뿍 기본 시트팩",daily:"뽑아 쓰는 데일리 팩",etc:"기타"};
+const $=id=>document.getElementById(id);
+let choice=null;
+
+document.querySelectorAll(".opt").forEach(el=>{
+  el.addEventListener("pointerdown",e=>{
+    const r=el.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2,sp=document.createElement("span");
+    sp.className="ripple";sp.style.width=sp.style.height=s+"px";
+    sp.style.left=(e.clientX-r.left-s/2)+"px";sp.style.top=(e.clientY-r.top-s/2)+"px";
+    el.appendChild(sp);setTimeout(()=>sp.remove(),650);
+  });
+  el.querySelector("input").addEventListener("change",()=>pick(el.dataset.v));
+});
+function pick(v){
+  choice=v;
+  document.querySelectorAll(".opt").forEach(o=>o.classList.toggle("on",o.dataset.v===v));
+  $("other").classList.toggle("open",v==="etc");
+  if(v==="etc") setTimeout(()=>$("other-text").focus(),250);
+  refresh();
+}
+$("other-text").addEventListener("input",refresh);
+$("f").addEventListener("submit",e=>e.preventDefault());
+function memo(){return $("other-text").value.trim().slice(0,300)}
+function refresh(){
+  const ok=!!choice&&(choice!=="etc"||memo().length>0);
+  $("submit").disabled=!ok;
+  const n=$("notice");n.classList.remove("err");
+  n.textContent=!choice?"하나를 선택하면 제출할 수 있어요.":(choice==="etc"&&!memo()?"기타 내용을 적어주세요.":"");
+  n.hidden=ok;
+}
+
+$("submit").addEventListener("click",async()=>{
+  const btn=$("submit");
+  const url=ENDPOINT+"?t="+encodeURIComponent(choice)+(choice==="etc"?"&m="+encodeURIComponent(memo()):"");
+  btn.classList.add("loading");btn.textContent="제출 중…";
+  try{
+    // 쿠키 없이 보내야 구글 다중 계정 버그를 피할 수 있음
+    await fetch(url,{method:"GET",mode:"no-cors",credentials:"omit",cache:"no-store"});
+    showDone();
+  }catch(e){
+    btn.classList.remove("loading");btn.textContent="제출하기";
+    const n=$("notice");n.hidden=false;n.classList.add("err");
+    n.textContent="전송에 실패했어요. 인터넷 연결을 확인하고 다시 눌러주세요.";
+  }
+});
+function showDone(){
+  $("mine").textContent="내 응답: "+LABEL[choice]+(choice==="etc"&&memo()?" — "+memo():"");
+  $("v-survey").hidden=true;$("bar").hidden=true;$("v-done").hidden=false;burst();
+  window.scrollTo(0,0);
+}
+function burst(){
+  const b=$("burst");b.querySelectorAll("i").forEach(i=>i.remove());
+  const c=b.querySelector(".core");const n=c.cloneNode(true);c.replaceWith(n);
+  for(let k=0;k<12;k++){const i=document.createElement("i");const a=k/12*Math.PI*2,d=54+Math.random()*16;
+    i.style.setProperty("--x",Math.cos(a)*d+"px");i.style.setProperty("--y",Math.sin(a)*d+"px");
+    i.style.animationDelay=(.2+Math.random()*.1)+"s";if(k%3===0)i.style.background="var(--accent)";b.appendChild(i);}
+}
+const SHARE_TEXT="마스크팩 설문조사 부탁드려요 😊\n가장 효과 좋았던 마스크팩 하나만 골라주시면 돼요. 10초면 끝나요 🙏";
+$("share").addEventListener("click",async()=>{
+  const msg=$("share-msg");
+  if(navigator.share){
+    try{await navigator.share({title:"마스크팩 설문조사",text:SHARE_TEXT,url:SHARE_URL});return}
+    catch(e){if(e&&e.name==="AbortError")return}
+  }
+  const all=SHARE_TEXT+"\n👉 "+SHARE_URL;
+  try{
+    await navigator.clipboard.writeText(all);
+    msg.textContent="링크를 복사했어요. 카톡 대화창에 붙여넣어 보내주세요.";
+    $("share").textContent="복사 완료 ✓";
+    setTimeout(()=>$("share").textContent="친구에게 공유하기",2500);
+  }catch(e){
+    const ta=$("share-text");ta.value=all;ta.hidden=false;ta.focus();ta.select();
+    msg.textContent="아래 내용을 길게 눌러 복사한 뒤 카톡에 붙여넣어 주세요.";
+  }
+  msg.classList.remove("toast-in");void msg.offsetWidth;msg.classList.add("toast-in");
+});
+refresh();
+</script>
+</body>
+</html>
