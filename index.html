@@ -217,7 +217,7 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
     <div class="done">
       <div class="burst" id="burst"><div class="core"><svg viewBox="0 0 36 36"><path d="M9 18.5l6 6L27 12"/></svg></div></div>
       <h2>응답 제출해주셔서 고맙습니다 🙏</h2>
-      <p>소중한 의견 잘 받았어요.</p>
+      <p id="done-sub">소중한 의견 잘 받았어요.</p>
       <div class="mine" id="mine"></div>
       <div class="res" id="res" hidden>
         <div class="res-h"><b>지금까지 응답 결과</b><span class="live"><i></i>실시간 · <em id="res-total"></em></span></div>
@@ -241,6 +241,11 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
 </div></div>
 
 <script>
+// 기기 단위 중복 제출 방지: 브라우저에 기기ID와 제출 내역 저장
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+let DID=store("maskpack-did");
+if(!DID){DID=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));store("maskpack-did",DID)}
+let SUB=null;try{SUB=JSON.parse(store("maskpack-sub")||"null")}catch(e){}
 const ENDPOINT="https://script.google.com/macros/s/AKfycbzBOWFWYZ5dEfHCZZ7zS7R4AeqjxUmUhriLn6-Jka_udHXbj1-C5uX6aT_cWRJY_oai6g/exec";
 const SHARE_URL="https://whippyhoki.github.io/maskpack-survey/";
 const LABEL={gel:"젤 타입 팩",sheet:"에센스 듬뿍 기본 시트팩",daily:"뽑아 쓰는 데일리 팩",etc:"기타"};
@@ -267,6 +272,7 @@ $("other-text").addEventListener("input",refresh);
 $("f").addEventListener("submit",e=>e.preventDefault());
 function memo(){return $("other-text").value.trim().slice(0,300)}
 function refresh(){
+  if(SUB){$("submit").disabled=false;$("submit").textContent="이미 참여했어요 · 결과 보기";const n=$("notice");n.hidden=false;n.classList.remove("err");n.textContent="설문은 기기당 한 번만 참여할 수 있어요.";return}
   const ok=!!choice&&(choice!=="etc"||memo().length>0);
   $("submit").disabled=!ok;
   const n=$("notice");n.classList.remove("err");
@@ -276,7 +282,8 @@ function refresh(){
 
 $("submit").addEventListener("click",async()=>{
   const btn=$("submit");
-  const url=ENDPOINT+"?f=json&t="+encodeURIComponent(choice)+(choice==="etc"?"&m="+encodeURIComponent(memo()):"");
+  if(SUB){choice=SUB.choice;showDone(null,true);return}
+  const url=ENDPOINT+"?f=json&d="+encodeURIComponent(DID)+"&t="+encodeURIComponent(choice)+(choice==="etc"?"&m="+encodeURIComponent(memo()):"");
   btn.classList.add("loading");btn.textContent="제출 중…";
   let data=null;
   try{
@@ -287,16 +294,21 @@ $("submit").addEventListener("click",async()=>{
     // 응답을 읽지 못해도 기록은 됐을 가능성이 높아 재전송하지 않음
     data=null;
   }
-  btn.classList.remove("loading");btn.textContent="제출하기";
-  showDone(data&&data.counts);
+  btn.classList.remove("loading");
+  const dup=!!(data&&data.dup);
+  SUB={choice:choice,memo:memo()};store("maskpack-sub",JSON.stringify(SUB));
+  showDone(data&&data.counts,dup);
 });
 const SHORT={gel:"젤 타입 팩",sheet:"에센스 기본 시트팩",daily:"뽑아 쓰는 데일리 팩",etc:"기타"};
-function showDone(c){
-  $("mine").textContent="내 응답: "+LABEL[choice]+(choice==="etc"&&memo()?" — "+memo():"");
+function showDone(c,already){
+  const mm=(SUB&&SUB.memo)||memo();
+  $("mine").textContent="내 응답: "+LABEL[choice]+(choice==="etc"&&mm?" — "+mm:"");
+  $("v-done").querySelector("h2").textContent=already?"이미 참여해주셨어요 🙏":"응답 제출해주셔서 고맙습니다 🙏";
+  $("done-sub").textContent=already?"설문은 한 번만 참여할 수 있어요. 지금까지 결과를 보여드릴게요.":"소중한 의견 잘 받았어요.";
   $("v-survey").hidden=true;$("bar").hidden=true;$("v-done").hidden=false;burst();
   window.scrollTo(0,0);
   $("r-rows").innerHTML="";
-  if(!c||!c.total){$("res").hidden=true}else{renderRes(c,true)}
+  if(!c||!c.total){$("res").hidden=true;fetchRes(true)}else{renderRes(c,true)}
   startLive();
 }
 const KEYS=["gel","sheet","daily","etc"];
@@ -331,6 +343,7 @@ function startLive(){
     try{const r=await fetch(ENDPOINT+"?f=json",{credentials:"omit",cache:"no-store"});const d=await r.json();renderRes(d.counts,$("r-rows").children.length===0)}catch(e){}
   },10000);
 }
+async function fetchRes(first){try{const r=await fetch(ENDPOINT+"?f=json",{credentials:"omit",cache:"no-store"});const d=await r.json();renderRes(d.counts,first)}catch(e){}}
 function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 $("back").addEventListener("click",()=>{
   stopLive();choice=null;$("other-text").value="";$("other").classList.remove("open");
@@ -364,6 +377,7 @@ $("share").addEventListener("click",async()=>{
   msg.classList.remove("toast-in");void msg.offsetWidth;msg.classList.add("toast-in");
 });
 refresh();
+if(SUB&&SUB.choice&&LABEL[SUB.choice]){choice=SUB.choice;showDone(null,true)}
 </script>
 </body>
 </html>
