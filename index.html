@@ -57,7 +57,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .eyebrow{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.02em}
 h1 .ln{white-space:nowrap}
-h1{font-size:clamp(20px,6.4vw,26px);line-height:1.38;font-weight:800;margin:6px 0 8px;text-wrap:balance;letter-spacing:-.02em}
+h1{font-size:clamp(20px,6.4vw,25px);line-height:1.38;font-weight:800;margin:6px 0 8px;text-wrap:balance;letter-spacing:-.02em}
 .sub{color:var(--muted);margin:0}
 
 /* 선택지 */
@@ -145,6 +145,17 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
 </style>
 
 <style>.btn.loading{opacity:.6;pointer-events:none}</style>
+<style>
+/* PC에서도 모바일과 같은 화면: 폭 420px 기둥으로 고정 */
+.wrap{max-width:420px}
+.bar .in{max-width:420px}
+@media (min-width:480px){
+  html{background:var(--soft)}
+  body{background:var(--soft)}
+  .wrap{background:var(--bg);min-height:100vh;box-shadow:0 0 0 1px var(--line),0 10px 40px rgba(25,31,40,.06)}
+  .bar{left:50%;right:auto;width:420px;transform:translateX(-50%);padding-left:16px;padding-right:16px;background:linear-gradient(to top,var(--bg) 70%,rgba(255,255,255,0))}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
