@@ -156,6 +156,17 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
   .bar{left:50%;right:auto;width:420px;transform:translateX(-50%);padding-left:16px;padding-right:16px;background:linear-gradient(to top,var(--bg) 70%,rgba(255,255,255,0))}
 }
 </style>
+<style>
+.res{width:100%;margin-top:20px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.res-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+.res-h span{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.res .rows{margin-top:14px;gap:14px}
+.res .track{background:var(--soft);height:10px}
+.row .top em.me{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 6px;vertical-align:1px}
+.row.pick .fill{background:linear-gradient(90deg,var(--essence),var(--accent))}
+.row:not(.pick) .fill{background:#b9d7fb}
+.back{margin-top:16px;color:var(--muted)}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -200,12 +211,17 @@ h3{font-size:15px;margin:0 0 10px;font-weight:800}
       <h2>응답 제출해주셔서 고맙습니다 🙏</h2>
       <p>소중한 의견 잘 받았어요.</p>
       <div class="mine" id="mine"></div>
+      <div class="res" id="res" hidden>
+        <div class="res-h"><b>지금까지 응답 결과</b><span id="res-total"></span></div>
+        <div class="rows" id="r-rows"></div>
+      </div>
       <div class="share">
         <p class="share-t">주변 친구들 의견도 궁금해요</p>
         <button class="btn" id="share" type="button">친구에게 공유하기</button>
         <p class="hint" id="share-msg" aria-live="polite"></p>
         <textarea id="share-text" readonly hidden></textarea>
       </div>
+      <button class="link back" id="back" type="button">← 처음으로 돌아가기</button>
     </div>
   </section>
 
@@ -252,23 +268,44 @@ function refresh(){
 
 $("submit").addEventListener("click",async()=>{
   const btn=$("submit");
-  const url=ENDPOINT+"?t="+encodeURIComponent(choice)+(choice==="etc"?"&m="+encodeURIComponent(memo()):"");
+  const url=ENDPOINT+"?f=json&t="+encodeURIComponent(choice)+(choice==="etc"?"&m="+encodeURIComponent(memo()):"");
   btn.classList.add("loading");btn.textContent="제출 중…";
+  let data=null;
   try{
     // 쿠키 없이 보내야 구글 다중 계정 버그를 피할 수 있음
-    await fetch(url,{method:"GET",mode:"no-cors",credentials:"omit",cache:"no-store"});
-    showDone();
+    const r=await fetch(url,{credentials:"omit",cache:"no-store"});
+    data=await r.json();
   }catch(e){
-    btn.classList.remove("loading");btn.textContent="제출하기";
-    const n=$("notice");n.hidden=false;n.classList.add("err");
-    n.textContent="전송에 실패했어요. 인터넷 연결을 확인하고 다시 눌러주세요.";
+    // 응답을 읽지 못해도 기록은 됐을 가능성이 높아 재전송하지 않음
+    data=null;
   }
+  btn.classList.remove("loading");btn.textContent="제출하기";
+  showDone(data&&data.counts);
 });
-function showDone(){
+const SHORT={gel:"젤 타입 팩",sheet:"에센스 기본 시트팩",daily:"뽑아 쓰는 데일리 팩",etc:"기타"};
+function showDone(c){
   $("mine").textContent="내 응답: "+LABEL[choice]+(choice==="etc"&&memo()?" — "+memo():"");
   $("v-survey").hidden=true;$("bar").hidden=true;$("v-done").hidden=false;burst();
   window.scrollTo(0,0);
+  const box=$("res"),rows=$("r-rows");rows.innerHTML="";
+  if(!c||!c.total){box.hidden=true;return}
+  box.hidden=false;$("res-total").textContent="총 "+c.total+"명";
+  ["gel","sheet","daily","etc"].forEach((k,i)=>{
+    const pct=Math.round(c[k]/c.total*100);
+    const row=document.createElement("div");row.className="row"+(k===choice?" pick":"");
+    row.innerHTML='<div class="top"><span></span><b></b></div><div class="track"><div class="fill"></div></div>';
+    const lab=row.querySelector("span");lab.textContent=SHORT[k];
+    if(k===choice){const t=document.createElement("em");t.className="me";t.textContent="내 선택";lab.appendChild(t)}
+    row.querySelector("b").textContent=pct+"%";
+    rows.appendChild(row);
+    setTimeout(()=>row.querySelector(".fill").style.width=pct+"%",250+i*120);
+  });
 }
+$("back").addEventListener("click",()=>{
+  choice=null;$("other-text").value="";$("other").classList.remove("open");
+  document.querySelectorAll(".opt").forEach(o=>{o.classList.remove("on");o.querySelector("input").checked=false});
+  $("v-done").hidden=true;$("v-survey").hidden=false;$("bar").hidden=false;refresh();window.scrollTo(0,0);
+});
 function burst(){
   const b=$("burst");b.querySelectorAll("i").forEach(i=>i.remove());
   const c=b.querySelector(".core");const n=c.cloneNode(true);c.replaceWith(n);
