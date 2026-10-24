@@ -13,13 +13,15 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f6f8fb">
+<meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 /* 레이아웃: 모바일 한 장짜리 설문. 상단 물방울 히어로 → 선택 카드 4개 → 하단 고정 제출 버튼. 관리자는 '결과' 탭 추가 */
 :root{
-  --bg:#f6f8fb;
+  --bg:#ffffff;
+  --soft:#f2f4f6;
+  color-scheme:light;
   --surface:#ffffff;
   --fg:#191f28;
   --muted:#6b7684;
@@ -33,14 +35,6 @@
   --font:"Pretendard","Pretendard Variable","Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --r:18px;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#101318;--surface:#1b1f26;--fg:#eef1f5;--muted:#9aa3ae;--line:#2a3039;
-  --accent:#4c93ff;--accent-soft:#16263d;--essence:#5aa9e6;--ok:#38d39f;--warn:#ff6b75;
-  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#101318;--surface:#1b1f26;--fg:#eef1f5;--muted:#9aa3ae;--line:#2a3039;
-  --accent:#4c93ff;--accent-soft:#16263d;--essence:#5aa9e6;--ok:#38d39f;--warn:#ff6b75;
-  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark}
 
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -75,7 +69,7 @@ h1{font-size:24px;line-height:1.38;font-weight:800;margin:6px 0 8px;text-wrap:ba
 .opt input{position:absolute;opacity:0;pointer-events:none}
 .opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
 .opt.on{border-color:var(--accent);background:var(--accent-soft)}
-.ico{flex:none;width:48px;height:48px;border-radius:14px;background:var(--bg);display:grid;place-items:center;transition:background .2s}
+.ico{flex:none;width:48px;height:48px;border-radius:14px;background:var(--soft);display:grid;place-items:center;transition:background .2s}
 .opt.on .ico{background:var(--surface)}
 .ico svg{width:30px;height:30px}
 .txt{flex:1;min-width:0}
